@@ -1,10 +1,18 @@
 require 'dockStation'
 RSpec.describe DockingStation do
     describe "#release_bike" do
-        it "releases bike" do
-            docking_station = DockingStation.new
-            bike = docking_station.release_bike
-            expect(bike).to be_an_instance_of(Bike)
+        it "responds to release bike" do
+            expect(subject).to respond_to :release_bike
+        end
+
+        it 'releases working bikes' do
+            bike = subject.release_bike
+            expect(bike).to be_working
+        end
+
+        it 'raises an error when no bikes available' do
+            docking_station = DockingStation.new(20, 0)
+            expect {docking_station.release_bike}.to raise_error 'No bikes available'
         end
     end
 
@@ -17,22 +25,34 @@ RSpec.describe DockingStation do
     end
 
     describe "dock_bike" do
-        it "allows user to dock a bike" do
-            docking_station = DockingStation.new
-            bike = docking_station.release_bike
-            expect(docking_station.dock_bike).to eq "You have docked your bike"
+        it "returns docked bikes" do
+            bike = Bike.new
+            docking_station = DockingStation.new(20, 19)
+            docking_station.dock(bike)
+            expect(docking_station.current_bikes).to eq docking_station.capacity
         end
 
-        it "warns user that there are no bikes available if docking station empty" do
-            docking_station = DockingStation.new([])
-            expect(docking_station.release_bike).to eq "No bikes available"
+        it "acknowledges returned bikes" do
+            bike = Bike.new
+            docking_station = DockingStation.new(20, 19)
+            expect(docking_station.dock(bike)).to eq "Bike docked successfully"
+        end
+
+        it "Does not allow bikes to be docked if station full" do
+            bike = Bike.new
+            docking_station = DockingStation.new
+            expect {docking_station.dock(bike)}.to raise_error 'Docking station full'
         end
     end
 
-    describe 'variable scope' do
-        it 'has access via attr_reader' do
-            docking_station = DockingStation.new
-            expect(docking_station.bikes.length).to eq 1
+    describe '#initialize' do
+        it 'lets the user set the capacity' do
+            docking_station = DockingStation.new(30)
+            expect(docking_station.capacity).to eq 30
+        end
+
+        it 'ensures that the starting quantity of bikes cannot exceed capacity' do
+            expect {docking_station = DockingStation.new(10, 20)}.to raise_error 'You cannot put more bikes in than the capacity'
         end
     end
 end

@@ -1,35 +1,46 @@
 class DockingStation
-  attr_reader :bikes
-  def initialize(bikes = [{1 => true}])
-    @bikes = bikes
+  DEFAULT_CAPACITY = 20
+  attr_reader :bike, :current_bikes, :capacity
+  def initialize(capacity = DEFAULT_CAPACITY, current_bikes = DEFAULT_CAPACITY)
+    if @current_bikes > @capacity
+      fail 'You cannot put more bikes in than the capacity'
+    end
+    @capacity = capacity
+    @current_bikes = current_bikes
   end
 
   def release_bike
-    if @bikes.empty?
-      "No bikes available"
+    if empty?
+      fail 'No bikes available' 
     else
+      @current_bikes > 0
+      @current_bikes -= 1
       Bike.new
     end
   end
 
-  def working?(id)
-    @bikes[id]
+  def dock(bike)
+    if full?
+      fail 'Docking station full'
+    else
+      @current_bikes += 1
+      'Bike docked successfully'
+    end
+  end
+private
+  def full?
+    @current_bikes == DEFAULT_CAPACITY ? true : false
   end
 
-  def dock_bike
-    "You have docked your bike"
+  def empty?
+    @current_bikes == 0 ? true : false
   end
 end
 
 class Bike
-  def initialize
-    @working = true
-  end
-
   def working?
-    @working
+    true
   end
-
 end
 
 
